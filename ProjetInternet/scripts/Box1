@@ -1,0 +1,50 @@
+#!/bin/bash
+
+# Sous reseau prive 1 : LAN
+ ip link set dev eth0 up
+ ip address add  192.168.0.1/26 dev eth0 
+ # Sous reseau publique 1 : WAN
+ ip link set dev eth1 up 
+ ip address add  1.1.1.1/27 dev eth1 
+
+ # Routage statique 
+ # Activer le routage / forwarding
+ echo 1 > /proc/sys/net/ipv4/ip_forward
+ #ip route add 1.1.1.32/27  via 1.1.1.2
+ #ip route add 1.1.1.64/27 via 1.1.1.2 
+ #ip route add 1.1.1.96/27 via 1.1.1.2 
+ #ip route add 1.1.1.128/27 via 1.1.1.2
+ #ip route add 1.1.1.160/27 via 1.1.1.2
+ #ip route add 1.1.1.192/27 via 1.1.1.2
+ #ip route add 1.1.1.224/27 via 1.1.1.2
+ 
+ # Route par default
+ ip route add default via 1.1.1.2
+
+ # Service DHCP : pour fourninr des adresses dynamiques aux machines du LAN
+ service isc-dhcp-server restart 
+
+ # NAT : translation d'adresses pour permettre au LAN de sortir au WAN 
+ iptables -t nat -A POSTROUTING -o eth1 -j MASQUERADE 
+
+ # securite par default
+ iptables -P INPUT DROP 
+ iptables -P OUTPUT DROP
+ iptables -P FORWARD DROP 
+
+ # Accepter les connexions établies
+iptables -A FORWARD -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+
+ # ping (ICMP) 
+ iptables -t filter -A FORWARD -p icmp -j ACCEPT 
+
+# Web / HTTP 
+ iptables -t filter -A FORWARD -p tcp --dport 80 -j ACCEPT #d = destination
+ iptables -t filter -A FORWARD -p tcp --sport 80 -j ACCEPT #s = source
+
+#  DNS 
+ iptables -t filter -A FORWARD -p udp --dport 53 -j ACCEPT 
+ iptables -t filter -A FORWARD -p udp --sport 53 -j ACCEPT
+
+
+

@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# Sous reseaux publique 8
+ ip link set dev eth0 up
+ ip address add  1.1.1.226/27 dev eth0 
+
+#Routage statique 
+ ip route add default via 1.1.1.225 dev eth0
+
+# Démarrer le service BIND9 (DNS)
+ service bind9 start

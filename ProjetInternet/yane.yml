@@ -1,0 +1,82 @@
+network:
+  name: ProjetInternet
+  version: 0.1
+  hosts:
+    - client1
+      mode : netns
+      init : ./scripts/client1
+ 
+    - Box1
+      mode : docker
+      image : dhcp_n7:latest
+      files : ./files/Box1/etc:/
+ 
+    - Box2
+      mode : docker
+      image : dhcp_n7:latest
+      files : ./files/Box2/etc:/
+ 
+    - client2
+      mode : netns
+      init : ./scripts/client2
+ 
+    - SWEBclient2
+      mode : docker
+      image : apache_n7:latest
+      files : ./files/SWEBclient2/var:/
+ 
+ 
+    - RouteurFAI
+      mode : docker
+      image : quagga_n7:latest
+      files : ./files/RouteurFAI/etc:/
+ 
+ 
+    - R1
+      mode : docker
+      image : quagga_n7:latest
+      files : ./files/R1/etc:/
+ 
+    - R2
+      mode : docker
+      image : quagga_n7:latest
+      files : ./files/R2/etc:/
+ 
+    - Rservices
+      mode : docker
+      image : quagga_n7:latest
+      files : ./files/Rservices/etc:/
+ 
+    - RservicesReseaux
+      mode : docker
+      image : quagga_n7:latest
+      files : ./files/RservicesReseaux/etc:/
+ 
+    - SWEB
+      mode : docker
+      image : apache_n7:latest
+      files : ./files/SWEB/var:/
+ 
+    - SDNS
+      mode : docker
+      image : dns_n7:latest
+      files : ./files/SDNS/etc:/
+ 
+  links :
+    - client1:eth0!Box1:eth0
+    - Box1:eth1!RouteurFAI:eth0
+    - Box2:eth1!RouteurFAI:eth2
+    - R1:eth1!Rservices:eth0
+    - Rservices:eth1!SWEB:eth0
+    - Rservices:eth2!RservicesReseaux:eth2
+    - R2:eth1!RservicesReseaux:eth0
+    - RservicesReseaux:eth1!SDNS:eth0
+ 
+  bridges:
+    - Switch0
+      interfaces: client2:eth0!SWEBclient2:eth0!Box2:eth0!
+    - Switch1
+      interfaces: RouteurFAI:eth1!R1:eth0!R2:eth0!
+ 
+  consoles :
+    - all

@@ -1,0 +1,12 @@
+#!/bin/bash
+
+
+# Sous reseaux prive 2
+ ip link set dev eth0 up
+ ip address add  192.168.0.131/26 dev eth0 
+
+#Routage statique 
+ ip route add default via 192.162.0.129 dev eth0
+
+ # Démarrer le serveur Apache
+ service apache2 start

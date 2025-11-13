@@ -1,0 +1,30 @@
+#!/bin/bash
+
+
+# Sous reseaux publique 7
+ ip link set dev eth0 up
+ ip address add  1.1.1.194/27 dev eth0 
+
+ # Sous reseaux publique 6
+ ip link set dev eth2 up 
+ ip address add  1.1.1.162/27 dev eth2
+
+ # Sous reseaux publique 8 
+ ip link set dev eth1 up 
+ ip address add  1.1.1.225/27 dev eth1 
+ 
+ # Activer le routage 
+ echo 1 > /proc/sys/net/ipv4/ip_forward
+
+ # Routage statique 
+# ip route add 1.1.1.0/27 via 1.1.1.193 
+# ip route add 1.1.1.32/27 via 1.1.1.193
+# ip route add 1.1.1.64/27 via 1.1.1.193
+# ip route add 1.1.1.96/27 via 1.1.1.161
+# ip route add 1.1.1.128/27 via 1.1.1.161
+
+## Routage dynamique 
+
+# Activation de quagga 
+ service quagga start 
+ sleep 1

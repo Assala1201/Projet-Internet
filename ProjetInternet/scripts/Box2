@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# Cote privee de la BOX 2
+
+ ip link set dev eth0 up
+ ip address add  192.168.0.129/26 dev eth0 
+
+ # Cote publique de la BOX 2
+
+ ip link set dev eth1 up 
+ ip address add  1.1.1.33/27 dev eth1
+ 
+ # Activer le routage
+ echo 1 > /proc/sys/net/ipv4/ip_forward
+ 
+ #Routes 
+
+ #ip route add 1.1.1.0/27  via 1.1.1.34
+ #ip route add 1.1.1.64/27 via 1.1.1.34
+ #ip route add 1.1.1.96/27 via 1.1.1.34 
+ #ip route add 1.1.1.128/27 via 1.1.1.34
+ #ip route add 1.1.1.160/27 via 1.1.1.34
+ #ip route add 1.1.1.192/27 via 1.1.1.34
+ #ip route add 1.1.1.224/27 via 1.1.1.34
+
+ ip route add default via 1.1.1.34
+
+ # DHCP 
+ service isc-dhcp-server restart
+ # NAT 
+ iptables -t nat -A POSTROUTING -o eth1 -j MASQUERADE 
+ # Permet d'accéder au serveur web interne depuis l'extérieur (derniere question)
+ iptables -t nat -A PREROUTING -p tcp -d 1.1.1.33 --dport 80 -j DNAT --to 192.168.0.131
+
+ # bloquer le trafic entre les interfaces
+ iptables -P FORWARD DROP 
+ # Permettre le suivi des connexions deja etablies
+ iptables -A FORWARD -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+ #PING / ICMP
+ iptables -t filter -A FORWARD -p icmp -j ACCEPT 
+ # WEB / HTTP
+ iptables -t filter -A FORWARD -p tcp --dport 80 -j ACCEPT 
+ iptables -t filter -A FORWARD -p tcp --sport 80 -j ACCEPT 
+ # DNS
+ iptables -t filter -A FORWARD -p udp --dport 53 -j ACCEPT 
+ iptables -t filter -A FORWARD -p udp --sport 53 -j ACCEPT
+ 
+
